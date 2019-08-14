@@ -146,39 +146,7 @@ static NSString *const SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaults
 }
 
 -(void)checkIfConfiguredProperly {
-    BOOL hasPublicKey = self.host.publicKeys.dsaPubKey != nil || self.host.publicKeys.ed25519PubKey != nil;
-    BOOL isMainBundle = [self.host.bundle isEqualTo:[NSBundle mainBundle]];
-    BOOL hostIsCodeSigned = [SUCodeSigningVerifier bundleAtURLIsCodeSigned:self.host.bundle.bundleURL];
-    NSURL *feedURL = [self feedURL];
-    BOOL servingOverHttps = [[[feedURL scheme] lowercaseString] isEqualToString:@"https"];
-    NSString *name = self.host.name;
 
-    if (!hasPublicKey) {
-        if (!isMainBundle) {
-            [self showAlertText:SULocalizedString(@"Auto-update not configured", nil)
-                informativeText:[NSString stringWithFormat:SULocalizedString(@"For security reasons, updates to %@ need to be signed with an EdDSA key. See Sparkle's documentation for more information.", nil), name]];
-        } else {
-            if (!hostIsCodeSigned) {
-                [self showAlertText:SULocalizedString(@"Auto-update not configured", nil)
-                    informativeText:[NSString stringWithFormat:SULocalizedString(@"For security reasons, %@ needs to be code-signed or its updates need to be signed with an EdDSA key. See https://sparkle-project.org/documentation/ for more information.", nil), name]];
-            } else if (!servingOverHttps) {
-                [self showAlertText:SULocalizedString(@"Auto-update not configured", nil)
-                    informativeText:[NSString stringWithFormat:SULocalizedString(@"For security reasons, updates to %@ need to be served over HTTPS and/or signed with an EdDSA key. See https://sparkle-project.org/documentation/ for more information.", nil), name]];
-            }
-        }
-    }
-
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101100
-    if (!servingOverHttps) {
-        BOOL atsExceptionsExist = nil != [self.host objectForInfoDictionaryKey:@"NSAppTransportSecurity"];
-        if (isMainBundle && !atsExceptionsExist) {
-            [self showAlertText:SULocalizedString(@"Insecure feed URL is blocked in macOS 10.11", nil)
-                informativeText:[NSString stringWithFormat:SULocalizedString(@"You must change the feed URL (%@) to use HTTPS or disable App Transport Security.\n\nFor more information:\nhttps://sparkle-project.org/documentation/app-transport-security/", nil), [feedURL absoluteString]]];
-        } else if (!isMainBundle) {
-            SULog(SULogLevelDefault, @"WARNING: Serving updates over HTTP may be blocked in macOS 10.11. Please change the feed URL (%@) to use HTTPS. For more information:\nhttps://sparkle-project.org/documentation/app-transport-security/", feedURL);
-        }
-    }
-#endif
 }
 
 
