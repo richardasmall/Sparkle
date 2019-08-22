@@ -496,16 +496,6 @@
     assert(self.updateItem);
     assert(self.updateValidator);
 
-    BOOL validationCheckSuccess = [self.updateValidator validateWithUpdateDirectory:self.tempDir];
-    if (!validationCheckSuccess) {
-        NSDictionary *userInfo = @{
-                                   NSLocalizedDescriptionKey: SULocalizedString(@"An error occurred while extracting the archive. Please try again later.", nil),
-                                   NSLocalizedFailureReasonErrorKey: SULocalizedString(@"The update is improperly signed.", nil),
-                                   };
-        [self abortUpdateWithError:[NSError errorWithDomain:SUSparkleErrorDomain code:SUSignatureError userInfo:userInfo]];
-        return;
-    }
-
     if (![self mayUpdateAndRestart])
     {
         [self abortUpdate];
